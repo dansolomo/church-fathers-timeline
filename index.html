@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Saints, Fathers &amp; Heresies: Five Periods</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --vellum: #ddcfa6;
+    --vellum-dark: #d2c194;
+    --ink: #2a2015;
+    --ink-soft: #4a3d2a;
+    --father: #2e4374;      /* lapis blue - Church Fathers */
+    --father-tint: #dde3ef;
+    --apologist: #8c2f2a;   /* rubric red - Apologists */
+    --apologist-tint: #f1dfdc;
+    --saint: #96700f;       /* gold leaf - Saints */
+    --saint-tint: #f0e5c9;
+    --heresy: #5c5468;      /* faded slate - condemned teachers */
+    --heresy-tint: #e6e2e9;
+    --rule: #a6875a;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--vellum);
+    background-image:
+      radial-gradient(ellipse at 20% 10%, rgba(255,255,255,0.10), transparent 45%),
+      radial-gradient(ellipse at 85% 60%, rgba(0,0,0,0.05), transparent 50%),
+      radial-gradient(ellipse at 10% 90%, rgba(0,0,0,0.04), transparent 40%);
+    color: var(--ink);
+    font-family: 'Spectral', Georgia, serif;
+    line-height: 1.5;
+    padding: 0 0 6rem 0;
+  }
+
+  header {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 4.5rem 1.5rem 2.5rem;
+    text-align: left;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .kicker {
+    font-family: 'Spectral', serif;
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    margin: 0 0 0.6rem 0;
+    letter-spacing: 0.02em;
+  }
+
+  h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 700;
+    font-size: clamp(2.2rem, 5vw, 3.2rem);
+    margin: 0 0 0.7rem 0;
+    line-height: 1.05;
+  }
+
+  header p.lede {
+    font-size: 1.05rem;
+    max-width: 60ch;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+
+  /* Period nav */
+  .period-nav {
+    max-width: 720px;
+    margin: 1.6rem auto 0;
+    padding: 0 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.9rem;
+  }
+
+  .period-nav a {
+    font-family: 'Spectral', serif;
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--ink-soft);
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 0.1rem;
+  }
+
+  .period-nav a:hover { color: var(--ink); }
+
+  /* Legend + filters */
+  .controls {
+    max-width: 720px;
+    margin: 2rem auto 0;
+    padding: 0 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem 1.6rem;
+    align-items: center;
+  }
+
+  .toggle {
+    appearance: none;
+    background: none;
+    border: none;
+    font-family: 'Spectral', serif;
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    cursor: pointer;
+    padding: 0.15rem 0 0.3rem 0;
+    border-bottom: 2px solid transparent;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: opacity 0.15s ease, border-color 0.15s ease;
+  }
+
+  .swatch {
+    width: 0.85rem;
+    height: 0.85rem;
+    display: inline-block;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.25);
+  }
+
+  .toggle[data-tag="CF"] .swatch { background: var(--father); }
+  .toggle[data-tag="AP"] .swatch { background: var(--apologist); }
+  .toggle[data-tag="ST"] .swatch { background: var(--saint); }
+  .toggle[data-tag="HE"] .swatch { background: var(--heresy); }
+
+  .toggle.active[data-tag="CF"] { border-color: var(--father); color: var(--ink); }
+  .toggle.active[data-tag="AP"] { border-color: var(--apologist); color: var(--ink); }
+  .toggle.active[data-tag="ST"] { border-color: var(--saint); color: var(--ink); }
+  .toggle.active[data-tag="HE"] { border-color: var(--heresy); color: var(--ink); }
+
+  .toggle:not(.active) { opacity: 0.4; }
+
+  .count {
+    font-family: 'Spectral', serif;
+    font-style: italic;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    margin-left: auto;
+  }
+
+  /* Timeline */
+  .timeline {
+    max-width: 720px;
+    margin: 3rem auto 0;
+    padding: 0 1.5rem;
+    position: relative;
+  }
+
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: calc(1.5rem + 3.2rem);
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--rule) 3%, var(--rule) 97%, transparent);
+  }
+
+  .period {
+    position: relative;
+    margin: 4.4rem 0 1.4rem;
+    padding-left: calc(3.2rem + 1.6rem);
+    scroll-margin-top: 1.5rem;
+  }
+
+  .period:first-child { margin-top: 0; }
+
+  .period .period-index {
+    font-family: 'Spectral', serif;
+    font-style: italic;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    display: block;
+    margin-bottom: 0.15rem;
+  }
+
+  .period h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 700;
+    font-size: 1.9rem;
+    color: var(--ink);
+    margin: 0 0 0.2rem 0;
+    letter-spacing: 0.005em;
+  }
+
+  .period .period-span {
+    font-family: 'Spectral', serif;
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+
+  .era {
+    position: relative;
+    margin: 2rem 0 1.1rem;
+    padding-left: calc(3.2rem + 1.6rem);
+  }
+
+  .era h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--ink-soft);
+    margin: 0;
+    letter-spacing: 0.01em;
+  }
+
+  .entry {
+    position: relative;
+    display: grid;
+    grid-template-columns: 3.2rem 1.6rem 1fr;
+    column-gap: 0;
+    margin-bottom: 1.5rem;
+    transition: opacity 0.2s ease, max-height 0.2s ease;
+  }
+
+  .entry.hidden { display: none; }
+
+  .year {
+    font-family: 'Spectral', serif;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    text-align: right;
+    padding-top: 0.3rem;
+    white-space: nowrap;
+  }
+
+  .node-col {
+    position: relative;
+    display: flex;
+    justify-content: center;
+  }
+
+  .node {
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: var(--ink);
+    margin-top: 0.55rem;
+    box-shadow: 0 0 0 3px var(--vellum);
+    z-index: 1;
+  }
+
+  .card {
+    padding: 0.15rem 0 0.15rem 1.1rem;
+    border-left: 3px solid var(--ink);
+    background: linear-gradient(to right, rgba(255,255,255,0.18), transparent 65%);
+  }
+
+  .entry[data-tags*="CF"]:not([data-tags*="AP"]):not([data-tags*="ST"]) .card { border-left-color: var(--father); }
+  .entry[data-tags*="AP"]:not([data-tags*="CF"]):not([data-tags*="ST"]) .card { border-left-color: var(--apologist); }
+  .entry[data-tags*="ST"]:not([data-tags*="CF"]):not([data-tags*="AP"]) .card { border-left-color: var(--saint); }
+  .entry[data-tags*="HE"] .card { border-left-color: var(--heresy); border-left-style: dashed; }
+  .entry[data-tags*="HE"] .node { background: var(--heresy); }
+  .entry.event .card { border-left-style: dotted; border-left-color: var(--ink-soft); }
+  .entry.event .node { background: var(--vellum-dark); box-shadow: inset 0 0 0 1px var(--ink-soft), 0 0 0 3px var(--vellum); }
+
+  .name-line {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .initial {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 700;
+    font-size: 1.55rem;
+    line-height: 1;
+  }
+
+  .entry[data-tags*="ST"] .initial { color: var(--saint); }
+  .entry[data-tags*="AP"]:not([data-tags*="ST"]) .initial { color: var(--apologist); }
+  .entry[data-tags*="CF"]:not([data-tags*="ST"]):not([data-tags*="AP"]) .initial { color: var(--father); }
+  .entry[data-tags*="HE"]:not([data-tags*="ST"]):not([data-tags*="AP"]):not([data-tags*="CF"]) .initial { color: var(--heresy); }
+  .entry.event .initial { color: var(--ink-soft); font-style: italic; }
+
+  .name {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: 1.2rem;
+  }
+
+  .tags {
+    display: inline-flex;
+    gap: 0.3rem;
+    margin-left: 0.1rem;
+  }
+
+  .tag {
+    font-family: 'Spectral', serif;
+    font-size: 0.68rem;
+    font-style: italic;
+    padding: 0.06rem 0.4rem;
+    border-radius: 2px;
+    line-height: 1.5;
+  }
+
+  .tag.CF { background: var(--father-tint); color: var(--father); }
+  .tag.AP { background: var(--apologist-tint); color: var(--apologist); }
+  .tag.ST { background: var(--saint-tint); color: var(--saint); }
+  .tag.HE { background: var(--heresy-tint); color: var(--heresy); }
+
+  .note {
+    font-size: 0.92rem;
+    color: var(--ink-soft);
+    max-width: 56ch;
+    margin: 0;
+  }
+
+  .response {
+    font-size: 0.88rem;
+    color: var(--heresy);
+    margin: 0.3rem 0 0 0;
+    font-style: italic;
+  }
+
+  footer {
+    max-width: 720px;
+    margin: 3.5rem auto 0;
+    padding: 1.5rem 1.5rem 0;
+    border-top: 1px solid var(--rule);
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+
+  @media (max-width: 560px) {
+    .timeline::before { left: calc(1.5rem + 2.1rem); }
+    .entry { grid-template-columns: 2.1rem 1.2rem 1fr; }
+    .year { font-size: 0.72rem; }
+    .period, .era { padding-left: calc(2.1rem + 1.2rem); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <p class="kicker">A reading timeline, in five periods</p>
+  <h1>Saints, Fathers &amp; Heresies</h1>
+  <p class="lede">From the Crucifixion to the present — the saints who shaped the Church, the heresies that provoked much of its doctrine, and the five ages that organize the story.</p>
+</header>
+
+<nav class="period-nav" id="periodNav"></nav>
+
+<div class="controls">
+  <button class="toggle active" data-tag="CF"><span class="swatch"></span>Church Fathers</button>
+  <button class="toggle active" data-tag="AP"><span class="swatch"></span>Apologists</button>
+  <button class="toggle active" data-tag="ST"><span class="swatch"></span>Saints</button>
+  <button class="toggle active" data-tag="HE"><span class="swatch"></span>Condemned teachers</button>
+  <span class="count" id="count"></span>
+</div>
+
+<div class="timeline" id="timeline"></div>
+
+<footer>
+  Dates are traditional and, for the earliest centuries, often approximate or disputed. Sainthood in the Patristic Age was mostly informal, popular recognition rather than formal canonization; later periods reflect the formal process as it developed.
+</footer>
+
+<script>
+const periods = [
+  { id: "p1", title: "The Patristic Age", span: "c. 30 \u2013 c. 640", before: 641 },
+  { id: "p2", title: "The Rise of Islam and the Schism", span: "641 \u2013 1274", before: 1275 },
+  { id: "p3", title: "The Late Medieval Church and the Reformation", span: "1274 \u2013 1648", before: 1649 },
+  { id: "p4", title: "From Westphalia to the Great War", span: "1648 \u2013 1918", before: 1919 },
+  { id: "p5", title: "The Modern Church", span: "1918 \u2013 present", before: 999999 }
+];
+
+const data = [
+  // --- Period 1: The Patristic Age ---
+  { year: 30, label: "c. 30", name: "The Crucifixion", tags: [], note: "The event from which this timeline is reckoned." },
+  { year: 99, label: "d. c. 99", name: "Clement of Rome", tags: ["CF"], note: "Bishop of Rome; wrote 1 Clement to settle a dispute in the Corinthian church." },
+  { year: 100, label: "fl. 1st\u20132nd c.", name: "The Ebionites", tags: ["HE"], note: "Jewish-Christian sect holding that Jesus was a fully human Messiah, not divine or pre-existent.", response: "Answered chiefly by Irenaeus, Against Heresies." },
+  { year: 110, label: "d. c. 108\u2013140", name: "Ignatius of Antioch", tags: ["CF","ST"], note: "Bishop of Antioch; seven letters written en route to martyrdom in Rome." },
+  { year: 124, label: "fl. c. 124", name: "Quadratus of Athens", tags: ["AP"], note: "Wrote one of the earliest known Christian apologies." },
+  { year: 130, label: "c. 60\u2013130", name: "Papias of Hierapolis", tags: ["CF"], note: "Bishop who collected oral traditions about Jesus and the apostles." },
+  { year: 135, label: "fl. c. 125\u2013140", name: "Aristides of Athens", tags: ["AP"], note: "Apology addressed to the emperor Hadrian." },
+  { year: 155, label: "c. 69\u2013155", name: "Polycarp of Smyrna", tags: ["CF","ST"], note: "Bishop of Smyrna and disciple of John the Apostle; his martyrdom is an early key text." },
+  { year: 165, label: "c. 100\u2013165", name: "Justin Martyr", tags: ["CF","AP","ST"], note: "Former philosopher who defended the faith in Greek philosophical terms; one of the few figures to wear all three marks." },
+  { year: 178, label: "fl. c. 176\u2013180", name: "Athenagoras of Athens", tags: ["AP"], note: "Wrote A Plea for the Christians and On the Resurrection." },
+  { year: 180, label: "d. c. 180", name: "Tatian", tags: ["AP"], note: "Compiled the Diatessaron, a harmony of the four Gospels; later drifted into heterodoxy." },
+  { year: 180, label: "fl. c. 180", name: "Theophilus of Antioch", tags: ["CF","AP"], note: "Bishop; possibly the first writer to use the word \u2018Trinity.\u2019" },
+  { year: 180, label: "d. c. 180", name: "Melito of Sardis", tags: ["CF","AP","ST"], note: "Bishop of Sardis; wrote an early Easter homily, On the Pascha." },
+  { year: 190, label: "fl. late 2nd c.", name: "Theodotus of Byzantium", tags: ["HE"], note: "Taught Jesus was born an ordinary man \u2018adopted\u2019 as Son of God at his baptism (Adoptionism).", response: "Excommunicated by Pope Victor I; opposed by Hippolytus." },
+  { year: 200, label: "fl. c. 200", name: "Noetus", tags: ["HE"], note: "Taught that Father, Son, and Spirit were one person under different names (Modalism).", response: "Answered by Hippolytus, Against Noetus." },
+  { year: 202, label: "c. 130\u2013202", name: "Irenaeus of Lyons", tags: ["CF","ST"], note: "Disciple of Polycarp; Against Heresies refuted Gnosticism and shaped the idea of apostolic tradition." },
+  { year: 203, label: "d. 203", name: "Perpetua &amp; Felicity", tags: ["ST"], note: "Martyrs of Carthage; their Passion may have been edited by Tertullian himself." },
+  { year: 210, label: "fl. c. 200\u2013210", name: "Praxeas", tags: ["HE"], note: "Modalist teacher active in Rome and Carthage; denied real distinction between Father and Son.", response: "Answered by Tertullian, Against Praxeas." },
+  { year: 210, label: "fl. early 3rd c.", name: "Minucius Felix", tags: ["AP"], note: "Wrote Octavius, a dialogue defending Christianity." },
+  { year: 215, label: "c. 150\u2013215", name: "Clement of Alexandria", tags: ["CF"], note: "Led the Alexandrian school; blended Christian faith with Greek philosophy." },
+  { year: 220, label: "c. 155\u2013220", name: "Tertullian", tags: ["CF","AP"], note: "First major Latin Christian writer. Never canonized \u2014 he died outside communion." },
+  { year: 220, label: "fl. c. 215\u2013220", name: "Sabellius", tags: ["HE"], note: "Systematized Modalism: Father, Son, and Spirit as three modes of one divine person.", response: "Condemned by synods in Rome and Alexandria." },
+  { year: 235, label: "c. 170\u2013235", name: "Hippolytus of Rome", tags: ["CF","ST"], note: "Wrote the Apostolic Tradition, a key early record of liturgical practice." },
+  { year: 250, label: "d. 250", name: "Pope Fabian", tags: ["ST"], note: "Bishop of Rome, martyred under the emperor Decius." },
+  { year: 253, label: "c. 184\u2013253", name: "Origen of Alexandria", tags: ["CF"], note: "Enormously prolific scholar; some later views were deemed heterodox, never canonized." },
+  { year: 253, label: "d. 253", name: "Pope Cornelius", tags: ["ST"], note: "Roman bishop and correspondent of Cyprian on the controversy over the \u2018lapsed.\u2019" },
+  { year: 258, label: "c. 210\u2013258", name: "Cyprian of Carthage", tags: ["CF","ST"], note: "Bishop of Carthage; wrote on church unity, then martyred under Valerian." },
+  { year: 258, label: "c. 200\u2013258", name: "Novatian", tags: ["CF"], note: "Wrote On the Trinity, then became a schismatic antipope \u2014 not venerated as a saint." },
+  { year: 258, label: "d. 258", name: "Lawrence of Rome", tags: ["ST"], note: "Deacon martyred in the same Valerian persecution as Cyprian." },
+  { year: 258, label: "d. 258", name: "Pope Sixtus II", tags: ["ST"], note: "Martyred alongside Lawrence under Valerian." },
+  { year: 265, label: "c. 190\u2013265", name: "Dionysius of Alexandria", tags: ["CF","ST"], note: "Bishop of Alexandria and student of Origen; wrote on the Trinity." },
+  { year: 268, label: "d. c. 275", name: "Paul of Samosata", tags: ["HE"], note: "Bishop of Antioch; taught the Logos was an impersonal power indwelling the man Jesus.", response: "Condemned and deposed by the Synod of Antioch, 268." },
+  { year: 270, label: "c. 213\u2013270", name: "Gregory Thaumaturgus", tags: ["CF","ST"], note: "\u2018The Wonder-Worker\u2019; bishop in Pontus, student of Origen." },
+  { year: 288, label: "d. c. 288", name: "Sebastian", tags: ["ST"], note: "Roman martyr under Diocletian." },
+  { year: 304, label: "d. c. 304", name: "Agnes of Rome", tags: ["ST"], note: "Virgin martyr under Diocletian's persecution." },
+  { year: 305, label: "c. 287\u2013305", name: "Catherine of Alexandria", tags: ["ST"], note: "Martyr whose traditional dates are debated by historians." },
+  { year: 311, label: "d. 311", name: "Methodius of Olympus", tags: ["CF","ST"], note: "Bishop and theologian, notable as a critic of Origen." },
+  { year: 312, label: "d. 312", name: "Lucian of Antioch", tags: ["ST"], note: "Theologian and martyr; his teaching influenced his student Arius." },
+  { year: 325, label: "c. 256\u2013336", name: "Arius", tags: ["HE"], note: "Alexandrian priest who taught the Son was a created being, not co-eternal with the Father.", response: "Condemned at the Council of Nicaea (325); answered principally by Athanasius." },
+  { year: 328, label: "d. 328", name: "Alexander of Alexandria", tags: ["CF","ST"], note: "Athanasius's predecessor as bishop; first formally condemned Arius." },
+  { year: 343, label: "c. 270\u2013343", name: "Nicholas of Myra", tags: ["ST"], note: "Bishop of Myra; later legend, not contemporary record, has him striking Arius at Nicaea." },
+  { year: 348, label: "292\u2013348", name: "Pachomius", tags: ["ST"], note: "Founder of communal (cenobitic) monasticism in Egypt." },
+  { year: 356, label: "251\u2013356", name: "Anthony the Great", tags: ["ST"], note: "\u2018Father of Monks\u2019; the great desert hermit of Egypt." },
+  { year: 357, label: "c. 256\u2013357", name: "Hosius of Cordova", tags: ["ST"], note: "Advisor to Constantine, likely helped draft the Nicene Creed's key term." },
+  { year: 367, label: "310\u2013367", name: "Hilary of Poitiers", tags: ["CF","ST"], note: "Called the \u2018Athanasius of the West\u2019 for defending Trinitarian orthodoxy." },
+  { year: 373, label: "296\u2013373", name: "Athanasius of Alexandria", tags: ["CF","ST"], note: "Chief defender of Trinitarian orthodoxy against Arianism, exiled multiple times." },
+  { year: 379, label: "330\u2013379", name: "Basil the Great", tags: ["CF","ST"], note: "Cappadocian Father; monastic rule-writer and bishop of Caesarea." },
+  { year: 381, label: "d. c. 364", name: "Macedonius I &amp; the Pneumatomachi", tags: ["HE"], note: "\u2018Spirit-fighters\u2019: accepted the Son's divinity but denied the Holy Spirit's.", response: "Condemned at Constantinople (381); answered by the Cappadocians." },
+  { year: 386, label: "313\u2013386", name: "Cyril of Jerusalem", tags: ["CF","ST"], note: "Bishop of Jerusalem, known for his catechetical lectures." },
+  { year: 390, label: "329\u2013390", name: "Gregory of Nazianzus", tags: ["CF","ST"], note: "Cappadocian Father known as \u2018the Theologian.\u2019" },
+  { year: 395, label: "335\u2013395", name: "Gregory of Nyssa", tags: ["CF","ST"], note: "Cappadocian Father and mystical theologian." },
+  { year: 397, label: "340\u2013397", name: "Ambrose of Milan", tags: ["CF","ST"], note: "Bishop of Milan whose preaching influenced Augustine's conversion." },
+  { year: 397, label: "316\u2013397", name: "Martin of Tours", tags: ["ST"], note: "Former soldier turned monk-bishop, with a hugely popular cult in Gaul." },
+  { year: 407, label: "347\u2013407", name: "John Chrysostom", tags: ["CF","ST"], note: "\u2018Golden-Mouthed\u2019 preacher, Archbishop of Constantinople." },
+  { year: 420, label: "347\u2013420", name: "Jerome", tags: ["CF","ST"], note: "Translated the Bible into Latin, producing the Vulgate (c. 382\u2013405)." },
+  { year: 430, label: "354\u2013430", name: "Augustine of Hippo", tags: ["CF","ST"], note: "Bishop of Hippo; Confessions and City of God made him the dominant voice of the Latin West." },
+  { year: 444, label: "c. 376\u2013444", name: "Cyril of Alexandria", tags: ["CF","ST"], note: "Led the fight against Nestorianism; central at the Council of Ephesus (431)." },
+  { year: 461, label: "c. 400\u2013461", name: "Leo the Great", tags: ["CF","ST"], note: "Pope whose Tome shaped the Council of Chalcedon's (451) definition of Christ's two natures." },
+  { year: 547, label: "c. 480\u2013547", name: "Benedict of Nursia", tags: ["ST"], note: "Founder of Western monasticism; wrote the Rule that shaped medieval religious life." },
+  { year: 604, label: "c. 540\u2013604", name: "Gregory the Great", tags: ["CF","ST"], note: "Pope and liturgical reformer; sent Augustine of Canterbury to evangelize England." },
+  { year: 636, label: "c. 560\u2013636", name: "Isidore of Seville", tags: ["CF","ST"], note: "Encyclopedist bishop; last major figure of the patristic tradition in the West." },
+
+  // --- Period 2: The Rise of Islam and the Schism ---
+  { year: 641, label: "641", name: "Fall of Alexandria", tags: [], note: "Arab conquest of Alexandria; opens the era of Islamic expansion into the Christian Mediterranean world." },
+  { year: 735, label: "c. 673\u2013735", name: "Bede the Venerable", tags: ["CF","ST"], note: "English monk-historian; Ecclesiastical History of the English People." },
+  { year: 749, label: "c. 675\u2013749", name: "John of Damascus", tags: ["CF","ST"], note: "Last of the traditional Eastern Fathers; wrote early Christian polemic addressing Islam directly, and defended icons." },
+  { year: 754, label: "c. 675\u2013754", name: "Boniface", tags: ["ST"], note: "\u2018Apostle to the Germans\u2019; missionary bishop, martyred in Frisia." },
+  { year: 869, label: "c. 826\u2013869", name: "Cyril &amp; Methodius", tags: ["ST"], note: "Missionary brothers to the Slavs; devised the script ancestral to Cyrillic, on the Rome\u2013Constantinople fault line." },
+  { year: 1054, label: "1054", name: "The Great Schism", tags: [], note: "Mutual excommunications between Rome and Constantinople formalize the East\u2013West split; no single saint is remembered as its protagonist." },
+  { year: 1109, label: "1033\u20131109", name: "Anselm of Canterbury", tags: ["CF","ST"], note: "Archbishop and scholastic theologian; Cur Deus Homo, the ontological argument." },
+  { year: 1153, label: "1090\u20131153", name: "Bernard of Clairvaux", tags: ["CF","ST"], note: "Cistercian abbot; preached the Second Crusade, shaped medieval mysticism." },
+  { year: 1179, label: "1098\u20131179", name: "Hildegard of Bingen", tags: ["CF","ST"], note: "Abbess, composer, and visionary theologian; later declared a Doctor of the Church." },
+  { year: 1221, label: "1170\u20131221", name: "Dominic de Guzman", tags: ["ST"], note: "Founder of the Dominican Order, focused on preaching against heresy." },
+  { year: 1226, label: "1181\u20131226", name: "Francis of Assisi", tags: ["ST"], note: "Founder of the Franciscan Order; radical embrace of poverty." },
+  { year: 1231, label: "1195\u20131231", name: "Anthony of Padua", tags: ["CF","ST"], note: "Franciscan preacher and Doctor of the Church." },
+  { year: 1253, label: "1194\u20131253", name: "Clare of Assisi", tags: ["ST"], note: "Founder of the Poor Clares, close companion of Francis." },
+  { year: 1274, label: "1225\u20131274", name: "Thomas Aquinas", tags: ["CF","ST"], note: "Summa Theologiae; the towering synthesis of scholastic theology and philosophy." },
+
+  // --- Period 3: The Late Medieval Church and the Reformation ---
+  { year: 1373, label: "1303\u20131373", name: "Bridget of Sweden", tags: ["ST"], note: "Mystic and founder of the Bridgettine Order." },
+  { year: 1380, label: "1347\u20131380", name: "Catherine of Siena", tags: ["CF","ST"], note: "Mystic who urged the papacy's return to Rome from Avignon; Doctor of the Church." },
+  { year: 1431, label: "1412\u20131431", name: "Joan of Arc", tags: ["ST"], note: "Led French forces during the Hundred Years' War; canonized only in 1920." },
+  { year: 1535, label: "1478\u20131535", name: "Thomas More", tags: ["ST"], note: "Statesman and martyr, executed for refusing to accept Henry VIII's supremacy over the Church." },
+  { year: 1535, label: "1469\u20131535", name: "John Fisher", tags: ["ST"], note: "Bishop, executed alongside More for the same refusal." },
+  { year: 1552, label: "1506\u20131552", name: "Francis Xavier", tags: ["ST"], note: "Jesuit missionary to India, Japan, and beyond." },
+  { year: 1556, label: "1491\u20131556", name: "Ignatius of Loyola", tags: ["ST"], note: "Founder of the Jesuits, a central figure of the Catholic Reformation." },
+  { year: 1582, label: "1515\u20131582", name: "Teresa of \u00c1vila", tags: ["CF","ST"], note: "Carmelite mystic and reformer; Doctor of the Church." },
+  { year: 1584, label: "1538\u20131584", name: "Charles Borromeo", tags: ["ST"], note: "Archbishop of Milan, leading implementer of the Council of Trent's reforms." },
+  { year: 1591, label: "1542\u20131591", name: "John of the Cross", tags: ["CF","ST"], note: "Carmelite mystic and poet; Doctor of the Church, co-reformer with Teresa of \u00c1vila." },
+  { year: 1595, label: "1515\u20131595", name: "Philip Neri", tags: ["ST"], note: "Founder of the Oratorians; known as the \u2018Apostle of Rome.\u2019" },
+  { year: 1617, label: "1586\u20131617", name: "Rose of Lima", tags: ["ST"], note: "First saint of the Americas, canonized in 1671." },
+
+  // --- Period 4: From Westphalia to the Great War ---
+  { year: 1648, label: "1648", name: "Peace of Westphalia", tags: [], note: "Ends the Thirty Years' War and the era of religious warfare between Catholic and Protestant states." },
+  { year: 1649, label: "1607\u20131649", name: "The North American Martyrs", tags: ["ST"], note: "Isaac Jogues, Jean de Br\u00e9beuf, and companions, Jesuit missionaries martyred in New France." },
+  { year: 1660, label: "1581\u20131660", name: "Vincent de Paul", tags: ["ST"], note: "Founder of charitable orders serving the poor; patron of charitable societies." },
+  { year: 1719, label: "1651\u20131719", name: "Jean-Baptiste de La Salle", tags: ["ST"], note: "Founder of the Christian Brothers, pioneer of modern teacher training." },
+  { year: 1787, label: "1696\u20131787", name: "Alphonsus Liguori", tags: ["CF","ST"], note: "Founder of the Redemptorists, moral theologian, Doctor of the Church." },
+  { year: 1821, label: "1774\u20131821", name: "Elizabeth Ann Seton", tags: ["ST"], note: "First American-born canonized saint; founded the U.S. parochial school system." },
+  { year: 1859, label: "1786\u20131859", name: "John Vianney", tags: ["ST"], note: "The Cur\u00e9 of Ars; patron saint of parish priests." },
+  { year: 1879, label: "1844\u20131879", name: "Bernadette Soubirous", tags: ["ST"], note: "Visionary of Lourdes." },
+  { year: 1888, label: "1815\u20131888", name: "John Bosco", tags: ["ST"], note: "Founder of the Salesians, dedicated to educating poor and at-risk youth." },
+  { year: 1897, label: "1873\u20131897", name: "Th\u00e9r\u00e8se of Lisieux", tags: ["CF","ST"], note: "\u2018The Little Flower\u2019; Doctor of the Church despite dying at 24." },
+
+  // --- Period 5: The Modern Church ---
+  { year: 1938, label: "1905\u20131938", name: "Faustina Kowalska", tags: ["ST"], note: "Polish nun, visionary behind the Divine Mercy devotion." },
+  { year: 1941, label: "1894\u20131941", name: "Maximilian Kolbe", tags: ["ST"], note: "Franciscan friar who offered his life in place of a stranger at Auschwitz." },
+  { year: 1942, label: "1891\u20131942", name: "Edith Stein", tags: ["ST"], note: "Philosopher and Carmelite nun of Jewish birth, killed at Auschwitz." },
+  { year: 1963, label: "1881\u20131963", name: "John XXIII", tags: ["ST"], note: "Pope who convened the Second Vatican Council." },
+  { year: 1968, label: "1887\u20131968", name: "Padre Pio", tags: ["ST"], note: "Capuchin friar reported to bear the stigmata; enormously popular modern devotion." },
+  { year: 1997, label: "1910\u20131997", name: "Teresa of Calcutta", tags: ["ST"], note: "Founder of the Missionaries of Charity, serving the poor in Kolkata and worldwide." },
+  { year: 2005, label: "1920\u20132005", name: "John Paul II", tags: ["ST"], note: "Long-serving pope; central figure in the fall of Communism in Eastern Europe." },
+  { year: 1979, label: "1895\u20131979", name: "Fulton Sheen", tags: [], note: "\u2018God's Microphone\u2019; Emmy-winning TV and radio evangelist. Still Venerable as of this writing \u2014 beatification is set for September 24, 2026, in St. Louis." },
+  { year: 2006, label: "1991\u20132006", name: "Carlo Acutis", tags: ["ST"], note: "Teenage programmer who catalogued Eucharistic miracles online; canonized September 7, 2025, as the Church's first millennial saint." }
+];
+
+const timelineEl = document.getElementById('timeline');
+const navEl = document.getElementById('periodNav');
+const sorted = data.slice().sort((a,b) => a.year - b.year);
+
+periods.forEach(p => {
+  const a = document.createElement('a');
+  a.href = '#' + p.id;
+  a.textContent = p.title;
+  navEl.appendChild(a);
+});
+
+let currentPeriodIdx = -1;
+sorted.forEach(d => {
+  const periodIdx = periods.findIndex(p => d.year < p.before);
+
+  if (periodIdx !== currentPeriodIdx) {
+    currentPeriodIdx = periodIdx;
+    const p = periods[periodIdx];
+    const periodEl = document.createElement('div');
+    periodEl.className = 'period';
+    periodEl.id = p.id;
+    periodEl.innerHTML = `<span class="period-index">Period ${periodIdx + 1}</span><h2>${p.title}</h2><p class="period-span">${p.span}</p>`;
+    timelineEl.appendChild(periodEl);
+  }
+
+  const entry = document.createElement('div');
+  const isEvent = d.tags.length === 0;
+  entry.className = 'entry' + (isEvent ? ' event' : '');
+  entry.setAttribute('data-tags', d.tags.join(','));
+
+  const tagLabel = t => t === 'CF' ? 'Father' : t === 'AP' ? 'Apologist' : t === 'ST' ? 'Saint' : 'Condemned';
+  const tagsHtml = d.tags.map(t => `<span class="tag ${t}">${tagLabel(t)}</span>`).join('');
+  const initial = d.name.trim().charAt(0);
+  const responseHtml = d.response ? `<p class="response">${d.response}</p>` : '';
+
+  entry.innerHTML = `
+    <div class="year">${d.label}</div>
+    <div class="node-col"><div class="node"></div></div>
+    <div class="card">
+      <div class="name-line">
+        <span class="initial">${initial}</span><span class="name">${d.name.slice(1)}</span>
+        <span class="tags">${tagsHtml}</span>
+      </div>
+      <p class="note">${d.note}</p>
+      ${responseHtml}
+    </div>
+  `;
+  timelineEl.appendChild(entry);
+});
+
+const toggles = document.querySelectorAll('.toggle');
+const countEl = document.getElementById('count');
+const filterableCount = data.filter(d => d.tags.length > 0).length;
+
+function applyFilters() {
+  const active = Array.from(toggles).filter(t => t.classList.contains('active')).map(t => t.dataset.tag);
+  const entries = document.querySelectorAll('.entry');
+  let visible = 0;
+  entries.forEach(entry => {
+    const tags = entry.getAttribute('data-tags').split(',').filter(Boolean);
+    const show = tags.length === 0 ? true : tags.some(t => active.includes(t));
+    entry.classList.toggle('hidden', !show);
+    if (show && tags.length > 0) visible++;
+  });
+  document.querySelectorAll('.period').forEach(period => {
+    let sib = period.nextElementSibling;
+    let hasVisible = false;
+    while (sib && (sib.classList.contains('entry') || sib.classList.contains('era'))) {
+      if (sib.classList.contains('entry') && !sib.classList.contains('hidden')) hasVisible = true;
+      sib = sib.nextElementSibling;
+    }
+    period.style.display = hasVisible ? '' : 'none';
+  });
+  countEl.textContent = `${visible} of ${filterableCount} figures shown`;
+}
+
+toggles.forEach(t => {
+  t.addEventListener('click', () => {
+    t.classList.toggle('active');
+    applyFilters();
+  });
+});
+
+applyFilters();
+</script>
+
+</body>
+</html>
