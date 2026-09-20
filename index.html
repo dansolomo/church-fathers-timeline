@@ -104,9 +104,6 @@
   }
 
   .toggle {
-    appearance: none;
-    background: none;
-    border: none;
     font-family: 'Spectral', serif;
     font-size: 0.95rem;
     color: var(--ink-soft);
@@ -116,7 +113,39 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    -webkit-user-select: none;
+    user-select: none;
     transition: opacity 0.15s ease, border-color 0.15s ease;
+  }
+
+  .toggle input {
+    appearance: none;
+    -webkit-appearance: none;
+    flex: none;
+    width: 0.95rem;
+    height: 0.95rem;
+    margin: 0;
+    border: 1px solid var(--rule);
+    background: rgba(255,255,255,0.35);
+    position: relative;
+    cursor: pointer;
+  }
+
+  .toggle input:checked::after {
+    content: "";
+    position: absolute;
+    left: 0.29rem;
+    top: 0.04rem;
+    width: 0.22rem;
+    height: 0.48rem;
+    border: solid var(--ink);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  .toggle input:focus-visible {
+    outline: 2px solid var(--ink-soft);
+    outline-offset: 2px;
   }
 
   .swatch {
@@ -131,6 +160,11 @@
   .toggle[data-tag="AP"] .swatch { background: var(--apologist); }
   .toggle[data-tag="ST"] .swatch { background: var(--saint); }
   .toggle[data-tag="HE"] .swatch { background: var(--heresy); }
+
+  .toggle[data-tag="CF"] input:checked::after { border-color: var(--father); }
+  .toggle[data-tag="AP"] input:checked::after { border-color: var(--apologist); }
+  .toggle[data-tag="ST"] input:checked::after { border-color: var(--saint); }
+  .toggle[data-tag="HE"] input:checked::after { border-color: var(--heresy); }
 
   .toggle.active[data-tag="CF"] { border-color: var(--father); color: var(--ink); }
   .toggle.active[data-tag="AP"] { border-color: var(--apologist); color: var(--ink); }
@@ -356,10 +390,10 @@
 <nav class="period-nav" id="periodNav"></nav>
 
 <div class="controls">
-  <button class="toggle active" data-tag="CF"><span class="swatch"></span>Church Fathers</button>
-  <button class="toggle active" data-tag="AP"><span class="swatch"></span>Apologists</button>
-  <button class="toggle active" data-tag="ST"><span class="swatch"></span>Saints</button>
-  <button class="toggle active" data-tag="HE"><span class="swatch"></span>Condemned teachers</button>
+  <label class="toggle active" data-tag="CF"><input type="checkbox" checked><span class="swatch"></span>Church Fathers</label>
+  <label class="toggle active" data-tag="AP"><input type="checkbox" checked><span class="swatch"></span>Apologists</label>
+  <label class="toggle active" data-tag="ST"><input type="checkbox" checked><span class="swatch"></span>Saints</label>
+  <label class="toggle active" data-tag="HE"><input type="checkbox" checked><span class="swatch"></span>Condemned teachers</label>
   <span class="count" id="count"></span>
 </div>
 
@@ -551,7 +585,7 @@ const countEl = document.getElementById('count');
 const filterableCount = data.filter(d => d.tags.length > 0).length;
 
 function applyFilters() {
-  const active = Array.from(toggles).filter(t => t.classList.contains('active')).map(t => t.dataset.tag);
+  const active = Array.from(toggles).filter(t => t.querySelector('input').checked).map(t => t.dataset.tag);
   const entries = document.querySelectorAll('.entry');
   let visible = 0;
   entries.forEach(entry => {
@@ -573,8 +607,9 @@ function applyFilters() {
 }
 
 toggles.forEach(t => {
-  t.addEventListener('click', () => {
-    t.classList.toggle('active');
+  const box = t.querySelector('input');
+  box.addEventListener('change', () => {
+    t.classList.toggle('active', box.checked);
     applyFilters();
   });
 });
