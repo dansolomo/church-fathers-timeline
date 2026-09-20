@@ -181,6 +181,40 @@
     margin-left: auto;
   }
 
+  .collapse-all {
+    max-width: 720px;
+    margin: 0.7rem auto 0;
+    padding: 0 1.5rem;
+  }
+
+  .link-btn {
+    appearance: none;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--rule);
+    padding: 0 0 0.1rem 0;
+    font-family: 'Spectral', serif;
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+
+  .link-btn:hover { color: var(--ink); }
+  .link-btn:focus-visible { outline: 2px solid var(--ink-soft); outline-offset: 3px; }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
   /* Timeline */
   .timeline {
     max-width: 720px;
@@ -207,6 +241,41 @@
   }
 
   .period:first-child { margin-top: 0; }
+
+  .period-group { scroll-margin-top: 1.5rem; }
+  .period-group:first-child .period { margin-top: 0; }
+  .period-group.collapsed .period { margin: 2.6rem 0 0.4rem; }
+  .period-group.collapsed .period-body { display: none; }
+
+  .period { cursor: pointer; }
+
+  .period-toggle {
+    appearance: none;
+    position: absolute;
+    left: 3.2rem;
+    top: 1.45rem;
+    transform: translateX(-50%);
+    width: 1.25rem;
+    height: 1.25rem;
+    padding: 0;
+    border: 1px solid var(--rule);
+    border-radius: 50%;
+    background: var(--vellum);
+    box-shadow: 0 0 0 3px var(--vellum);
+    color: var(--ink-soft);
+    font-family: 'Spectral', serif;
+    font-size: 0.9rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .period:hover .period-toggle { color: var(--ink); border-color: var(--ink-soft); }
+  .period-toggle:focus-visible { outline: 2px solid var(--ink-soft); outline-offset: 3px; }
 
   .period .period-index {
     font-family: 'Spectral', serif;
@@ -376,6 +445,7 @@
     .entry { grid-template-columns: 2.1rem 1.2rem 1fr; }
     .year { font-size: 0.72rem; }
     .period, .era { padding-left: calc(2.1rem + 1.2rem); }
+    .period-toggle { left: 2.1rem; }
   }
 </style>
 </head>
@@ -395,6 +465,10 @@
   <label class="toggle active" data-tag="ST"><input type="checkbox" checked><span class="swatch"></span>Saints</label>
   <label class="toggle active" data-tag="HE"><input type="checkbox" checked><span class="swatch"></span>Condemned teachers</label>
   <span class="count" id="count"></span>
+</div>
+
+<div class="collapse-all">
+  <button class="link-btn" id="collapseAll" type="button">Collapse all periods</button>
 </div>
 
 <div class="timeline" id="timeline"></div>
@@ -542,17 +616,32 @@ periods.forEach(p => {
 });
 
 let currentPeriodIdx = -1;
+let bodyEl = null;
 sorted.forEach(d => {
   const periodIdx = periods.findIndex(p => d.year < p.before);
 
   if (periodIdx !== currentPeriodIdx) {
     currentPeriodIdx = periodIdx;
     const p = periods[periodIdx];
+    const group = document.createElement('section');
+    group.className = 'period-group';
+    group.id = p.id;
+
     const periodEl = document.createElement('div');
     periodEl.className = 'period';
-    periodEl.id = p.id;
-    periodEl.innerHTML = `<span class="period-index">Period ${periodIdx + 1}</span><h2>${p.title}</h2><p class="period-span">${p.span}</p>`;
-    timelineEl.appendChild(periodEl);
+    periodEl.innerHTML = `
+      <button class="period-toggle" type="button" aria-expanded="true" aria-controls="${p.id}-body"><span class="sign" aria-hidden="true">\u2212</span><span class="sr-only">Collapse ${p.title}</span></button>
+      <span class="period-index">Period ${periodIdx + 1}</span>
+      <h2>${p.title}</h2>
+      <p class="period-span">${p.span}</p>`;
+
+    bodyEl = document.createElement('div');
+    bodyEl.className = 'period-body';
+    bodyEl.id = p.id + '-body';
+
+    group.appendChild(periodEl);
+    group.appendChild(bodyEl);
+    timelineEl.appendChild(group);
   }
 
   const entry = document.createElement('div');
@@ -577,7 +666,48 @@ sorted.forEach(d => {
       ${responseHtml}
     </div>
   `;
-  timelineEl.appendChild(entry);
+  bodyEl.appendChild(entry);
+});
+
+const groups = Array.from(document.querySelectorAll('.period-group'));
+const collapseAllBtn = document.getElementById('collapseAll');
+
+function setCollapsed(group, collapsed) {
+  group.classList.toggle('collapsed', collapsed);
+  const btn = group.querySelector('.period-toggle');
+  const title = group.querySelector('h2').textContent;
+  btn.setAttribute('aria-expanded', String(!collapsed));
+  btn.querySelector('.sign').textContent = collapsed ? '+' : '\u2212';
+  btn.querySelector('.sr-only').textContent = (collapsed ? 'Expand ' : 'Collapse ') + title;
+}
+
+function syncCollapseAll() {
+  const anyOpen = groups.some(g => !g.classList.contains('collapsed'));
+  collapseAllBtn.textContent = anyOpen ? 'Collapse all periods' : 'Expand all periods';
+}
+
+groups.forEach(group => {
+  group.querySelector('.period').addEventListener('click', () => {
+    setCollapsed(group, !group.classList.contains('collapsed'));
+    syncCollapseAll();
+  });
+});
+
+collapseAllBtn.addEventListener('click', () => {
+  const collapse = groups.some(g => !g.classList.contains('collapsed'));
+  groups.forEach(g => setCollapsed(g, collapse));
+  syncCollapseAll();
+});
+
+// jumping to a period from the nav opens it
+navEl.addEventListener('click', e => {
+  const a = e.target.closest('a');
+  if (!a) return;
+  const group = document.querySelector(a.getAttribute('href'));
+  if (group) {
+    setCollapsed(group, false);
+    syncCollapseAll();
+  }
 });
 
 const toggles = document.querySelectorAll('.toggle');
@@ -594,14 +724,9 @@ function applyFilters() {
     entry.classList.toggle('hidden', !show);
     if (show && tags.length > 0) visible++;
   });
-  document.querySelectorAll('.period').forEach(period => {
-    let sib = period.nextElementSibling;
-    let hasVisible = false;
-    while (sib && (sib.classList.contains('entry') || sib.classList.contains('era'))) {
-      if (sib.classList.contains('entry') && !sib.classList.contains('hidden')) hasVisible = true;
-      sib = sib.nextElementSibling;
-    }
-    period.style.display = hasVisible ? '' : 'none';
+  groups.forEach(group => {
+    const hasVisible = group.querySelector('.entry:not(.hidden)') !== null;
+    group.style.display = hasVisible ? '' : 'none';
   });
   countEl.textContent = `${visible} of ${filterableCount} figures shown`;
 }
